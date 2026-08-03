@@ -121,7 +121,7 @@ jobs:
 
           for attempt in 1 2 3; do
             echo "kiwi build attempt: $attempt"
-            rm -rf /image-root/build
+            rm -rf /image-root/build/build
             if kiwi-ng --debug system build \
               --description /image-root \
               --target-dir /image-root/build; then
