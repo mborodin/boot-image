@@ -29,7 +29,8 @@ IPXE_SRC=""
 for candidate in \
     "$BOOT_ROOT"/usr/share/mok-ipxe/ipxe.efi \
     "$(dirname "$0")"/root/usr/share/mok-ipxe/ipxe.efi \
-    "$(dirname "$0")"/payload/ipxe.efi
+    "$(dirname "$0")"/payload/ipxe.efi \
+    /image-root/ipxe.efi
 do
     if [[ -f "$candidate" ]]; then IPXE_SRC="$candidate"; break; fi
 done
