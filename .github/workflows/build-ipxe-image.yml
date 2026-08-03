@@ -117,10 +117,23 @@ jobs:
             bash -c "set -euo pipefail
               zypper --non-interactive --gpg-auto-import-keys refresh
               zypper --non-interactive install python3-kiwi binutils
-              kiwi-ng --debug system build \
-                --description /image-root \
-                --target-dir /image-root/build \
-                --set-repo https://download.opensuse.org/tumbleweed/repo/oss/"
+
+              for attempt in 1 2 3; do
+                echo \"kiwi build attempt: \\$attempt\"
+                if kiwi-ng --debug system build \
+                  --description /image-root \
+                  --target-dir /image-root/build; then
+                  exit 0
+                fi
+
+                if [ \"\\$attempt\" -lt 3 ]; then
+                  echo \"kiwi build failed on attempt \\$attempt, retrying...\" >&2
+                  sleep 15
+                fi
+              done
+
+              echo \"kiwi build failed after 3 attempts\" >&2
+              exit 1"
 
       - name: Dump kiwi build log on failure
         if: failure()
@@ -130,8 +143,10 @@ jobs:
             echo "::group::image-root.log"
             cat "$log"
             echo "::endgroup::"
-            echo "--- lines mentioning 'scriptlet' or 'error' ---"
-            grep -inE 'scriptlet|error' "$log" || true
+            echo "--- lines mentioning scriptlet/error/404/timeout ---"
+            grep -inE 'scriptlet|error|404|timed out|failed|nothing provides|problem:' "$log" || true
+            echo "--- last 250 log lines ---"
+            tail -n 250 "$log" || true
           else
             echo "no image-root.log found at $log"
             find "$GITHUB_WORKSPACE/build" -iname '*.log' 2>/dev/null
