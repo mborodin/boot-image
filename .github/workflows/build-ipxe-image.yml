@@ -105,7 +105,7 @@ jobs:
 
       - name: Sign ipxe.efi
         run: |
-          "$GITHUB_WORKSPACE/sign-ipxe-for-kiwi.sh" \
+          bash "$GITHUB_WORKSPACE/sign-ipxe-for-kiwi.sh" \
             -i "$GITHUB_WORKSPACE/ipxe.efi" \
             -k "$GITHUB_WORKSPACE/MOK.key" \
             -c "$GITHUB_WORKSPACE/MOK.crt"
@@ -135,9 +135,9 @@ jobs:
           RELEASE_TITLE: ${{ inputs.release_name }}
           RELEASE_TAG: ${{ steps.version.outputs.version }}
           IPXE_REF: ${{ inputs.ipxe_ref }}
-          CHAINLOAD_URL: ${{ inputs.chainload_url }}
+          UYUNI_FQDN: ${{ inputs.uyuni_fqdn }}
         run: |
           gh release create "$RELEASE_TAG" \
             --title "$RELEASE_TITLE" \
-            --notes "iPXE ref: $IPXE_REF"$'\n'"Chainload URL: $CHAINLOAD_URL" \
+            --notes "iPXE ref: $IPXE_REF"$'\n'"Uyuni FQDN: $UYUNI_FQDN" \
             "$GITHUB_WORKSPACE"/build/*.iso
