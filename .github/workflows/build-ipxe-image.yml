@@ -114,29 +114,13 @@ jobs:
             -v "$GITHUB_WORKSPACE:/image-root" \
             -w /image-root \
             opensuse/tumbleweed:latest \
-            bash -s <<'BASH'
-          set -euo pipefail
-          zypper --non-interactive --gpg-auto-import-keys refresh
-          zypper --non-interactive install python3-kiwi binutils
-
-          for attempt in 1 2 3; do
-            echo "kiwi build attempt: $attempt"
-            rm -rf /image-root/build/build
-            if kiwi-ng --debug system build \
-              --description /image-root \
-              --target-dir /image-root/build; then
-              exit 0
-            fi
-
-            if [ "$attempt" -lt 3 ]; then
-              echo "kiwi build failed on attempt $attempt, retrying..." >&2
-              sleep 15
-            fi
-          done
-
-          echo "kiwi build failed after 3 attempts" >&2
-          exit 1
-          BASH
+            bash -c "set -euo pipefail
+              ls -la /image-root
+              zypper --non-interactive --gpg-auto-import-keys refresh
+              zypper --non-interactive install python3-kiwi binutils
+              kiwi-ng --debug system build \
+                --description /image-root \
+                --target-dir /image-root/build"
 
       - name: Dump kiwi build log on failure
         if: failure()
