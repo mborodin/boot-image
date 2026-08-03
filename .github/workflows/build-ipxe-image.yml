@@ -120,10 +120,36 @@ jobs:
             bash -c "set -euo pipefail
               zypper --non-interactive --gpg-auto-import-keys refresh
               zypper --non-interactive install python3-kiwi
-              kiwi-ng system build \
+              kiwi-ng --debug system build \
                 --description /image-root \
                 --target-dir /image-root/build \
                 --set-repo https://download.opensuse.org/tumbleweed/repo/oss/"
+
+      - name: Dump kiwi build log on failure
+        if: failure()
+        run: |
+          log="$GITHUB_WORKSPACE/build/build/image-root.log"
+          if [ -f "$log" ]; then
+            echo "::group::image-root.log"
+            cat "$log"
+            echo "::endgroup::"
+            echo "--- lines mentioning 'scriptlet' or 'error' ---"
+            grep -inE 'scriptlet|error' "$log" || true
+          else
+            echo "no image-root.log found at $log"
+            find "$GITHUB_WORKSPACE/build" -iname '*.log' 2>/dev/null
+          fi
+
+      - name: Upload kiwi build tree on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kiwi-build-log
+          path: |
+            ${{ github.workspace }}/build/build/image-root.log
+            ${{ github.workspace }}/build/build/image-root/var/log
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Compute release version
         id: version
