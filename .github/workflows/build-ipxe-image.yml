@@ -12,6 +12,9 @@ name: Build iPXE boot image
 #      tag/version = UTC timestamp in YYYYMMDDHHmm form.
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       uyuni_fqdn:
