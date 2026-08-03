@@ -110,7 +110,7 @@ jobs:
       - name: Build image with kiwi-ng
         run: |
           mkdir -p "$GITHUB_WORKSPACE/build"
-          docker run --rm --privileged \
+          docker run --rm --privileged -i \
             -v "$GITHUB_WORKSPACE:/image-root" \
             -w /image-root \
             opensuse/tumbleweed:latest \
