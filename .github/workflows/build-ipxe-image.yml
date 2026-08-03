@@ -12,9 +12,6 @@ name: Build iPXE boot image
 #      tag/version = UTC timestamp in YYYYMMDDHHmm form.
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       uyuni_fqdn:
@@ -119,7 +116,7 @@ jobs:
             opensuse/tumbleweed:latest \
             bash -c "set -euo pipefail
               zypper --non-interactive --gpg-auto-import-keys refresh
-              zypper --non-interactive install python3-kiwi
+              zypper --non-interactive install python3-kiwi binutils
               kiwi-ng --debug system build \
                 --description /image-root \
                 --target-dir /image-root/build \
