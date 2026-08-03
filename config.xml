@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Minimal openSUSE Tumbleweed live ISO, built with kiwi-ng.
+
+  Boot menu (see editbootconfig.sh):
+    1. iPXE boot                                - chainloads /EFI/BOOT/ipxe.efi
+    2. Enroll Secure Boot certificate (mokutil)  - boots this same live system
+                                                    with "mokenroll" on the
+                                                    kernel command line, which
+                                                    triggers mok-enroll.service
+    3. Live OS (default)                        - normal KIWI live boot entry
+
+  Before building, run sign-ipxe-for-kiwi.sh (see README.md) to drop a
+  signed ipxe.efi + MOK.der into root/usr/share/mok-ipxe/.
+-->
+<image schemaversion="8.0" name="ipxe-secureboot-live">
+
+    <description type="system">
+        <author>Maks</author>
+        <contact>borodin.maksym@gmail.com</contact>
+        <specification>
+            Minimal openSUSE Tumbleweed live ISO with iPXE chainload and
+            Secure Boot MOK auto-enrollment boot entries
+        </specification>
+    </description>
+
+    <preferences>
+        <version>1.0.0</version>
+        <packagemanager>zypper</packagemanager>
+        <rpm-excludedocs>true</rpm-excludedocs>
+        <locale>en_US</locale>
+        <keytable>us</keytable>
+        <timezone>UTC</timezone>
+        <type
+            image="iso"
+            primary="true"
+            flags="overlay"
+            firmware="efi"
+            filesystem="squashfs"
+            editbootconfig="editbootconfig.sh"
+        >
+            <bootloader name="grub2" timeout="10"/>
+        </type>
+    </preferences>
+
+    <!-- Adjust/mirror as needed for your build host -->
+    <repository type="rpm-md" alias="oss">
+        <source path="https://download.opensuse.org/tumbleweed/repo/oss/"/>
+    </repository>
+    <repository type="rpm-md" alias="oss-update">
+        <source path="https://download.opensuse.org/update/tumbleweed/"/>
+    </repository>
+
+    <packages type="bootstrap">
+        <package name="filesystem"/>
+        <package name="glibc-locale-base"/>
+        <package name="openSUSE-release"/>
+        <package name="ca-certificates"/>
+    </packages>
+
+    <packages type="image">
+        <!-- kernel + live boot machinery -->
+        <package name="kernel-default"/>
+        <package name="dracut-kiwi-live"/>
+
+        <!-- bootloader / secure boot chain (shim + grub2 as shipped/signed by openSUSE) -->
+        <package name="grub2"/>
+        <package name="grub2-x86_64-efi"/>
+        <package name="grub2-i386-pc"/>
+        <package name="shim"/>
+        <package name="mokutil"/>
+
+        <!-- minimal usable base -->
+        <package name="systemd"/>
+        <package name="udev"/>
+        <package name="NetworkManager"/>
+        <package name="iproute2"/>
+        <package name="iputils"/>
+        <package name="less"/>
+        <package name="vim"/>
+        <package name="openssh"/>
+    </packages>
+
+</image>

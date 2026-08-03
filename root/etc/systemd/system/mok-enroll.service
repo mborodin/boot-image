@@ -1,0 +1,16 @@
+[Unit]
+Description=Auto-enroll iPXE Secure Boot certificate as MOK, then reboot
+DefaultDependencies=no
+After=local-fs.target
+ConditionKernelCommandLine=mokenroll
+ConditionPathExists=!/var/lib/mok-enroll/done
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/mok-enroll.sh
+RemainAfterExit=yes
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target

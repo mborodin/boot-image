@@ -1,0 +1,140 @@
+name: Build iPXE boot image
+
+# Manually triggered pipeline:
+#   1. Clone iPXE sources (ref selectable via input).
+#   2. Generate a boot.ipxe that just chainloads the given URL.
+#   3. Build bin-x86_64-efi/ipxe.efi, embedding boot.ipxe as the default
+#      script and every certificate in ca/ as a trusted root (TRUST=).
+#   4. Materialize MOK.key/MOK.crt from repo secrets and run
+#      sign-ipxe-for-kiwi.sh against the freshly built ipxe.efi.
+#   5. Build the kiwi-ng live ISO.
+#   6. Publish it as a GitHub release: title = release_name input,
+#      tag/version = UTC timestamp in YYYYMMDDHHmm form.
+
+on:
+  workflow_dispatch:
+    inputs:
+      uyuni_fqdn:
+        description: "Uyuni FQDN that boot.ipxe should chainload to"
+        required: true
+        type: string
+      release_name:
+        description: "Name/title for the GitHub release"
+        required: true
+        type: string
+      ipxe_ref:
+        description: "ipxe/ipxe git ref (branch/tag/commit) to build"
+        required: false
+        type: string
+        default: master
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Checkout iPXE sources
+        uses: actions/checkout@v4
+        with:
+          repository: ipxe/ipxe
+          ref: ${{ inputs.ipxe_ref }}
+          path: ipxe-src
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential genisoimage git isolinux liblzma-dev mtools syslinux \
+            sbsigntool openssl
+
+      - name: Generate boot.ipxe
+        env:
+          UYUNI_FQDN: ${{ inputs.uyuni_fqdn }}
+        run: |
+          cat > "$GITHUB_WORKSPACE/boot.ipxe" <<EOF
+          #!ipxe
+          set dhcp_mac \${net0/mac:hex}
+          chain --autofree https://${UYUNI_FQDN}/cblr/svc/op/ipxe/mac/\${dhcp_mac}
+          EOF
+          echo "--- boot.ipxe ---"
+          cat "$GITHUB_WORKSPACE/boot.ipxe"
+
+      - name: Collect trust certificates from ca/
+        id: certs
+        run: |
+          mapfile -t cert_files < <(find "$GITHUB_WORKSPACE/ca" -maxdepth 1 -type f \( -name '*.crt' -o -name '*.pem' \) | sort)
+          if [ "${#cert_files[@]}" -eq 0 ]; then
+            echo "::warning::No certificates found in ca/ - ipxe.efi will be built without embedded trust anchors"
+          else
+            printf 'trusting: %s\n' "${cert_files[@]}"
+          fi
+          trust_list=$(IFS=,; echo "${cert_files[*]}")
+          echo "trust_list=$trust_list" >> "$GITHUB_OUTPUT"
+
+      - name: Build ipxe.efi (bin-x86_64-efi)
+        env:
+          TRUST_LIST: ${{ steps.certs.outputs.trust_list }}
+        run: |
+          make -C ipxe-src/src \
+            bin-x86_64-efi/ipxe.efi \
+            EMBED="$GITHUB_WORKSPACE/boot.ipxe" \
+            TRUST="$TRUST_LIST" \
+            -j"$(nproc)"
+          cp ipxe-src/src/bin-x86_64-efi/ipxe.efi "$GITHUB_WORKSPACE/ipxe.efi"
+
+      - name: Materialize MOK key/cert from secrets
+        env:
+          MOK_KEY_PEM: ${{ secrets.MOK_KEY }}
+          MOK_CRT_PEM: ${{ secrets.MOK_CRT }}
+        run: |
+          if [ -z "$MOK_KEY_PEM" ] || [ -z "$MOK_CRT_PEM" ]; then
+            echo "::error::MOK_KEY and MOK_CRT repository secrets must both be set (PEM-encoded private key / certificate)"
+            exit 1
+          fi
+          printf '%s\n' "$MOK_KEY_PEM" > "$GITHUB_WORKSPACE/MOK.key"
+          printf '%s\n' "$MOK_CRT_PEM" > "$GITHUB_WORKSPACE/MOK.crt"
+          chmod 600 "$GITHUB_WORKSPACE/MOK.key"
+
+      - name: Sign ipxe.efi
+        run: |
+          "$GITHUB_WORKSPACE/sign-ipxe-for-kiwi.sh" \
+            -i "$GITHUB_WORKSPACE/ipxe.efi" \
+            -k "$GITHUB_WORKSPACE/MOK.key" \
+            -c "$GITHUB_WORKSPACE/MOK.crt"
+
+      - name: Build image with kiwi-ng
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/build"
+          docker run --rm --privileged \
+            -v "$GITHUB_WORKSPACE:/image-root" \
+            -w /image-root \
+            opensuse/tumbleweed:latest \
+            bash -c "set -euo pipefail
+              zypper --non-interactive --gpg-auto-import-keys refresh
+              zypper --non-interactive install python3-kiwi
+              kiwi-ng system build \
+                --description /image-root \
+                --target-dir /image-root/build \
+                --set-repo https://download.opensuse.org/tumbleweed/repo/oss/"
+
+      - name: Compute release version
+        id: version
+        run: echo "version=$(date -u +%Y%m%d%H%M)" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TITLE: ${{ inputs.release_name }}
+          RELEASE_TAG: ${{ steps.version.outputs.version }}
+          IPXE_REF: ${{ inputs.ipxe_ref }}
+          CHAINLOAD_URL: ${{ inputs.chainload_url }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            --title "$RELEASE_TITLE" \
+            --notes "iPXE ref: $IPXE_REF"$'\n'"Chainload URL: $CHAINLOAD_URL" \
+            "$GITHUB_WORKSPACE"/build/*.iso
