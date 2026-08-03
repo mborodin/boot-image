@@ -46,12 +46,12 @@
 
     <!-- Adjust/mirror as needed for your build host -->
     <repository type="rpm-md" alias="oss">
-        <source path="https://ftp.icm.edu.pl/Linux/ibiblio/distributions/opensuse/tumbleweed/repo/oss/"/>
-        <!-- <source path="https://download.opensuse.org/tumbleweed/repo/oss/"/> -->
+        <!-- <source path="https://ftp.icm.edu.pl/Linux/ibiblio/distributions/opensuse/tumbleweed/repo/oss/"/> -->
+        <source path="https://download.opensuse.org/tumbleweed/repo/oss/"/>
     </repository>
     <repository type="rpm-md" alias="oss-update">
-        <source path="https://ftp.icm.edu.pl/Linux/ibiblio/distributions/opensuse/update/tumbleweed/"/>
-        <!-- <source path="https://download.opensuse.org/update/tumbleweed/"/> -->
+        <!-- <source path="https://ftp.icm.edu.pl/Linux/ibiblio/distributions/opensuse/update/tumbleweed/"/> -->
+        <source path="https://download.opensuse.org/update/tumbleweed/"/>
     </repository>
 
     <packages type="bootstrap">
