@@ -47,6 +47,10 @@ echo "editbootconfig.sh: using ipxe.efi: $IPXE_SRC" >&2
 
 # --- Locate the EFI/BOOT directory (where grubx64.efi/BOOTX64.EFI live) -----
 EFI_BOOT_FILE="$(find "$BOOT_ROOT" -iname 'BOOTX64.EFI' 2>/dev/null | head -1 || true)"
+
+# tmp - to check
+EFI_BOOT_FILE="/boot/efi/EFI/boot/bootx64.efi"
+
 if [[ -z "$EFI_BOOT_FILE" ]]; then
     echo "editbootconfig.sh: ERROR - no BOOTX64.EFI found under $BOOT_ROOT" >&2
     exit 1
