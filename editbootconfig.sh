@@ -87,7 +87,10 @@ echo "=============================="
 echo "| grub.cfg                   |"
 echo "+----------------------------+"
 echo "| dir: $BOOT_ROOT            |"
+echo "+----------------------------+"
 find "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null || true
+echo "+----------------------------+"
+find "$BOOT_ROOT"/boot -type f -name 'grub.cfg' 2>/dev/null | true
 echo "+----------------------------+"
 file "$BOOT_ROOT"/boot/grub2/grub.cfg || true
 echo "+----------------------------+"
