@@ -50,9 +50,10 @@ EFI_BOOT_FILE="$(find "$BOOT_ROOT" -iname 'BOOTX64.EFI' 2>/dev/null | head -1 ||
 
 
 # tmp - to check - START
-ls -alR /image-root/
+ls -al /image-root/build/build/image-root
+
 EFI_BOOT_FILE="/boot/efi/EFI/boot/bootx64.efi"
-$BOOT_ROOT="/image-root/build"
+BOOT_ROOT="/image-root/build/build/image-root"
 mkdir -p "$(dirname "$EFI_BOOT_FILE")"
 # tmp - to check - END
 
