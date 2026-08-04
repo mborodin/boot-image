@@ -65,7 +65,6 @@ EFI_BOOT_FILE="$(find "$BOOT_ROOT" -iname 'BOOTX64.EFI' 2>/dev/null | head -1 ||
 
 
 # tmp - to check - START
-ls -laR "$BOOT_ROOT"/boot/
 EFI_BOOT_FILE="$BOOT_ROOT"/boot/efi/EFI/BOOT/bootx64.efi
 mkdir -p "$(dirname "$EFI_BOOT_FILE")"
 # tmp - to check - END
@@ -86,9 +85,13 @@ mapfile -t GRUB_CFGS < <(find "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null)
 
 echo "=============================="
 echo "| grub.cfg                   |"
-find "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null
-echo "|"
-file "$BOOT_ROOT"/boot/grub2/grub.cfg
+echo "+----------------------------+"
+echo "| dir: $BOOT_ROOT            |"
+find "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null || true
+echo "+----------------------------+"
+file "$BOOT_ROOT"/boot/grub2/grub.cfg || true
+echo "+----------------------------+"
+ls -laR "$BOOT_ROOT"/boot/grub2/ || true
 echo "=============================="
 
 
