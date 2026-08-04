@@ -21,7 +21,22 @@
 
 set -euo pipefail
 
-BOOT_ROOT="${1:-.}"
+# BOOT_ROOT="${1:-.}"
+BOOT_ROOT_RAW="${1:-.}"
+BOOT_ROOT="$BOOT_ROOT_RAW"
+
+if [[ ! -d "$BOOT_ROOT" && "$BOOT_ROOT" == *:* ]]; then
+    BOOT_ROOT_STRIPPED="${BOOT_ROOT#*:}"
+    if [[ -d "$BOOT_ROOT_STRIPPED" ]]; then
+        BOOT_ROOT="$BOOT_ROOT_STRIPPED"
+    fi
+fi
+
+if [[ ! -d "$BOOT_ROOT" ]]; then
+    echo "editbootconfig.sh: ERROR - BOOT_ROOT is not a directory: $BOOT_ROOT_RAW (normalized: $BOOT_ROOT)" >&2
+    exit 1
+fi
+
 echo "editbootconfig.sh: scanning under: $BOOT_ROOT" >&2
 
 # --- Locate the signed iPXE payload -----------------------------------------
@@ -50,11 +65,9 @@ EFI_BOOT_FILE="$(find "$BOOT_ROOT" -iname 'BOOTX64.EFI' 2>/dev/null | head -1 ||
 
 
 # tmp - to check - START
-ls -al /image-root/build/build/image-root
-
-EFI_BOOT_FILE="/boot/efi/EFI/boot/bootx64.efi"
-BOOT_ROOT="/image-root/build/build/image-root"
-mkdir -p "$(dirname "$EFI_BOOT_FILE")"
+ls -laR /boot/
+# ls -al /image-root/build/build/image-root
+# EFI_BOOT_FILE="/boot/efi/EFI/boot/bootx64.efi"
 # tmp - to check - END
 
 
