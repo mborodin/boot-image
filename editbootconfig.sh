@@ -43,16 +43,16 @@ if [[ -z "$IPXE_SRC" ]]; then
     echo "                   before 'kiwi-ng system build'?" >&2
     exit 1
 fi
-echo "editbootconfig.sh: using ipxe.efi: $IPXE_SRC" >&2
+echo "===> editbootconfig.sh: using ipxe.efi: $IPXE_SRC" >&2
 
 # --- Locate the EFI/BOOT directory (where grubx64.efi/BOOTX64.EFI live) -----
 EFI_BOOT_FILE="$(find "$BOOT_ROOT" -iname 'BOOTX64.EFI' 2>/dev/null | head -1 || true)"
 
 
 # tmp - to check - START
+ls -alR /image-root/
 EFI_BOOT_FILE="/boot/efi/EFI/boot/bootx64.efi"
-$BOOT_ROOT="/image-root/build/build/image-root"
-ls -la "$BOOT_ROOT"
+$BOOT_ROOT="/image-root/build"
 mkdir -p "$(dirname "$EFI_BOOT_FILE")"
 # tmp - to check - END
 
