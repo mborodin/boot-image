@@ -83,6 +83,10 @@
         <package name="less"/>
         <package name="vim"/>
         <package name="openssh"/>
+
+        <package name="curl"/>
+        <package name="cryptsetup"/>
+        <package name="dolly"/>
     </packages>
 
 </image>
