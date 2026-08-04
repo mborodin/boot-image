@@ -117,7 +117,7 @@ jobs:
             bash -c "set -euo pipefail
               ls -la /image-root
               zypper --non-interactive --gpg-auto-import-keys refresh
-              zypper --non-interactive install python3-kiwi binutils qemu-tools dosfstools
+              zypper --non-interactive install python3-kiwi binutils qemu-tools dosfstools squashfs xorriso mtools syslinux
               kiwi-ng --debug system build \
                 --description /image-root \
                 --target-dir /image-root/build"
