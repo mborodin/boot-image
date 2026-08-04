@@ -80,33 +80,39 @@ cp -v "$IPXE_SRC" "$EFI_BOOT_DIR/ipxe.efi" >&2
 
 
 # --- Rewrite every grub.cfg found -------------------------------------------
-mapfile -t GRUB_CFGS < <(find "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null)
+# mapfile -t GRUB_CFGS < <(find "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null)
 
-
-echo "=============================="
-echo "| grub.cfg                   |"
-echo "+----------------------------+"
-echo "| dir: $BOOT_ROOT            |"
-echo "+----------------------------+"
+# echo "=============================="
+# echo "| grub.cfg                   |"
+# echo "+----------------------------+"
+# echo "| dir: $BOOT_ROOT            |"
+# echo "+----------------------------+"
 # ls -laR "$BOOT_ROOT"/boot/grub2/
 # echo "+----------------------------+"
-file "$BOOT_ROOT"/boot/grub2/grub.cfg || true
-echo "+----------------------------+"
-find -L "$BOOT_ROOT"/boot -type f -name 'grub.cfg' 2>/dev/null || true
-echo "+----------------------------+"
-find -L "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null || true
-echo "=============================="
+# file "$BOOT_ROOT"/boot/grub2/grub.cfg || true
+# echo "+----------------------------+"
+# find -L "$BOOT_ROOT"/boot -type f -name 'grub.cfg' 2>/dev/null || true
+# echo "+----------------------------+"
+# find -L "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null || true
+# echo "=============================="
 
 
-if [[ "${#GRUB_CFGS[@]}" -eq 0 ]]; then
-    echo "editbootconfig.sh: ERROR - no grub.cfg found under $BOOT_ROOT" >&2
+if [[ ! -f "$BOOT_ROOT"/boot/grub2/grub.cfg ]]; then
+    echo "editbootconfig.sh: ERROR - no grub.cfg found under $BOOT_ROOT/boot/grub2" >&2
     exit 1
 fi
 
+# if [[ "${#GRUB_CFGS[@]}" -eq 0 ]]; then
+#     echo "editbootconfig.sh: ERROR - no grub.cfg found under $BOOT_ROOT" >&2
+#     exit 1
+# fi
 
-for cfg in "${GRUB_CFGS[@]}"; do
-    echo "editbootconfig.sh: patching $cfg" >&2
-    python3 - "$cfg" <<'PYEOF'
+
+# for cfg in "${GRUB_CFGS[@]}"; do
+
+cfg="$BOOT_ROOT"/boot/grub2/grub.cfg
+echo "editbootconfig.sh: patching $cfg" >&2
+python3 - "$cfg" <<'PYEOF'
 import re
 import sys
 
@@ -185,6 +191,6 @@ with open(path, "w") as f:
 print("editbootconfig.sh: inserted iPXE + mokutil entries, default -> Live OS (index 2)",
       file=sys.stderr)
 PYEOF
-done
+# done
 
 echo "editbootconfig.sh: done" >&2
