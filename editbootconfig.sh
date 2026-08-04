@@ -50,6 +50,7 @@ EFI_BOOT_FILE="$(find "$BOOT_ROOT" -iname 'BOOTX64.EFI' 2>/dev/null | head -1 ||
 
 # tmp - to check
 EFI_BOOT_FILE="/boot/efi/EFI/boot/bootx64.efi"
+mkdir -p "$(dirname "$EFI_BOOT_FILE")"
 
 if [[ -z "$EFI_BOOT_FILE" ]]; then
     echo "editbootconfig.sh: ERROR - no BOOTX64.EFI found under $BOOT_ROOT" >&2
