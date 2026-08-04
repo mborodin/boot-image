@@ -65,10 +65,8 @@ EFI_BOOT_FILE="$(find "$BOOT_ROOT" -iname 'BOOTX64.EFI' 2>/dev/null | head -1 ||
 
 
 # tmp - to check - START
-ls -laR /boot/
 ls -laR "$BOOT_ROOT"/boot/
-# ls -al /image-root/build/build/image-root
-EFI_BOOT_FILE="/boot/efi/EFI/boot/bootx64.efi"
+EFI_BOOT_FILE="$BOOT_ROOT"/boot/efi/EFI/BOOT/bootx64.efi
 mkdir -p "$(dirname "$EFI_BOOT_FILE")"
 # tmp - to check - END
 
@@ -78,14 +76,27 @@ if [[ -z "$EFI_BOOT_FILE" ]]; then
     exit 1
 fi
 EFI_BOOT_DIR="$(dirname "$EFI_BOOT_FILE")"
+echo "===> copy signed ipxe.efi to $EFI_BOOT_DIR/ipxe.efi"
 cp -v "$IPXE_SRC" "$EFI_BOOT_DIR/ipxe.efi" >&2
+
 
 # --- Rewrite every grub.cfg found -------------------------------------------
 mapfile -t GRUB_CFGS < <(find "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null)
+
+
+echo "=============================="
+echo "| grub.cfg                   |"
+find "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null
+echo "|"
+file "$BOOT_ROOT"/boot/grub2/grub.cfg
+echo "=============================="
+
+
 if [[ "${#GRUB_CFGS[@]}" -eq 0 ]]; then
     echo "editbootconfig.sh: ERROR - no grub.cfg found under $BOOT_ROOT" >&2
     exit 1
 fi
+
 
 for cfg in "${GRUB_CFGS[@]}"; do
     echo "editbootconfig.sh: patching $cfg" >&2
