@@ -60,24 +60,32 @@ if [[ -z "$IPXE_SRC" ]]; then
 fi
 echo "===> editbootconfig.sh: using ipxe.efi: $IPXE_SRC" >&2
 
-# --- Locate the EFI/BOOT directory (where grubx64.efi/BOOTX64.EFI live) -----
-EFI_BOOT_FILE="$(find "$BOOT_ROOT" -iname 'BOOTX64.EFI' 2>/dev/null | head -1 || true)"
+# --- Locate/create EFI/BOOT staging directory -------------------------------
+# In KIWI editbootconfig phase BOOTX64.EFI may not exist yet.
+# We must place ipxe.efi into the EFI tree that KIWI later packs into the ISO.
+EFI_BOOT_DIR=""
 
+for d in \
+    "$BOOT_ROOT/EFI/BOOT" \
+    "$BOOT_ROOT/boot/efi/EFI/BOOT"
+do
+    if [[ -d "$d" ]]; then
+        EFI_BOOT_DIR="$d"
+        break
+    fi
+done
 
-# tmp - to check - START
-EFI_BOOT_FILE="$BOOT_ROOT"/boot/efi/EFI/BOOT/bootx64.efi
-mkdir -p "$(dirname "$EFI_BOOT_FILE")"
-# tmp - to check - END
-
-
-if [[ -z "$EFI_BOOT_FILE" ]]; then
-    echo "editbootconfig.sh: ERROR - no BOOTX64.EFI found under $BOOT_ROOT" >&2
-    exit 1
+if [[ -z "$EFI_BOOT_DIR" ]]; then
+    # Preferred location for live-media staging (picked up later by KIWI)
+    EFI_BOOT_DIR="$BOOT_ROOT/EFI/BOOT"
+    mkdir -p "$EFI_BOOT_DIR"
 fi
-EFI_BOOT_DIR="$(dirname "$EFI_BOOT_FILE")"
-echo "===> copy signed ipxe.efi to $EFI_BOOT_DIR/ipxe.efi"
+
+echo "===> copy signed ipxe.efi to $EFI_BOOT_DIR/ipxe.efi" >&2
 cp -v "$IPXE_SRC" "$EFI_BOOT_DIR/ipxe.efi" >&2
 
+echo "===> verify EFI tree (depth 3):" >&2
+find "$BOOT_ROOT/EFI" -maxdepth 3 -type f 2>/dev/null | sort >&2 || true
 
 # --- Rewrite every grub.cfg found -------------------------------------------
 # mapfile -t GRUB_CFGS < <(find "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null)
