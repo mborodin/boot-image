@@ -59,7 +59,7 @@ jobs:
           cat > "$GITHUB_WORKSPACE/boot.ipxe" <<EOF
           #!ipxe
           set dhcp_mac \${net0/mac:hex}
-          chain --autofree https://${UYUNI_FQDN}/cblr/svc/op/ipxe/mac/\${dhcp_mac}
+          chain --autofree http://${UYUNI_FQDN}/cblr/svc/op/ipxe/mac/\${dhcp_mac}
           EOF
           echo "--- boot.ipxe ---"
           cat "$GITHUB_WORKSPACE/boot.ipxe"
