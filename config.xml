@@ -38,11 +38,16 @@
             flags="overlay"
             firmware="efi"
             filesystem="squashfs"
-            editbootconfig="editbootconfig.sh"
-        >
+            editbootconfig="editbootconfig.sh">
+
             <bootloader name="grub2" timeout="10"/>
         </type>
     </preferences>
+
+    <users>
+        <user name="root" home="/root" password="$6$m2cDZT59XDn1W1iu$2OgHEcicKNCtpUzk26Kv3X0rreVa.9sdNheZjus5AQbcPmlcDgtcOJ/oG/EWPG3ZqwjEE8ky76HEpBUuhsKKR/"/>
+        <user name="admin" groups="wheel" home="/home/admin" password="$6$lPd/ZwL27tuC5Z29$r5sxSt0xKB91xCJK1RefppTQBi4rdYRl1jxxs6ttQtdEmWLoeyNogihMM/lmX66FipWGno7V4C6Nh5wffYm51."/>
+    </users>
 
     <!-- Adjust/mirror as needed for your build host -->
     <repository type="rpm-md" alias="oss">
