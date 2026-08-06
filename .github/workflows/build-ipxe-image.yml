@@ -116,7 +116,6 @@ jobs:
             opensuse/tumbleweed:latest \
             bash -c "set -euo pipefail
               ls -la /image-root
-              ls -la /image-root/build
               ls -Ra /image-root/root
               zypper --non-interactive --gpg-auto-import-keys refresh
               zypper --non-interactive install python3-kiwi binutils qemu-tools dosfstools squashfs xorriso mtools syslinux
