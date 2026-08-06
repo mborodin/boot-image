@@ -40,9 +40,6 @@ fi
 echo "editbootconfig.sh: scanning under: $BOOT_ROOT" >&2
 
 # --- Locate the signed iPXE payload -----------------------------------------
-echo "editbootconfig.sh: location: $(pwd)" >&2
-echo "editbootconfig.sh: BOOT_ROOT: $(dirname "$0")" >&2
-
 IPXE_SRC=""
 for candidate in \
     "$BOOT_ROOT"/usr/share/mok-ipxe/ipxe.efi \

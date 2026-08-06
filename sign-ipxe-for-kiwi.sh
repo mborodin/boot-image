@@ -81,10 +81,9 @@ echo "Signing $IPXE_SRC ..."
 sbsign --key "$KEY" --cert "$CERT" --output "$OUT_DIR/ipxe.efi" "$IPXE_SRC"
 cp "$DESC_DIR/MOK.der" "$OUT_DIR/MOK.der"
 
-
+echo "===> verify signed files: $OUT_DIR/ipxe.efi $OUT_DIR/MOK.der" >&2
 md5sum "$OUT_DIR/ipxe.efi" >&2
-ls -la "$OUT_DIR" >&2
-
+md5sum "$OUT_DIR/MOK.der" >&2
 
 cat <<EOF
 
