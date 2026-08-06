@@ -84,6 +84,7 @@ jobs:
             bin-x86_64-efi/ipxe.efi \
             EMBED="$GITHUB_WORKSPACE/boot.ipxe" \
             TRUST="$TRUST_LIST" \
+            DEBUG=all \
             -j"$(nproc)"
           cp ipxe-src/src/bin-x86_64-efi/ipxe.efi "$GITHUB_WORKSPACE/ipxe.efi"
 
