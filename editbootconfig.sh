@@ -60,32 +60,22 @@ if [[ -z "$IPXE_SRC" ]]; then
 fi
 echo "===> editbootconfig.sh: using ipxe.efi: $IPXE_SRC" >&2
 
-# --- Locate/create EFI/BOOT staging directory -------------------------------
-# In KIWI editbootconfig phase BOOTX64.EFI may not exist yet.
-# We must place ipxe.efi into the EFI tree that KIWI later packs into the ISO.
-EFI_BOOT_DIR=""
 
-for d in \
-    "$BOOT_ROOT/EFI/BOOT" \
+# --- Ensure ipxe.efi is present in both common KIWI EFI staging layouts -----
+TARGET_EFI_DIRS=(
+    "$BOOT_ROOT/EFI/BOOT"
     "$BOOT_ROOT/boot/efi/EFI/BOOT"
-do
-    if [[ -d "$d" ]]; then
-        EFI_BOOT_DIR="$d"
-        break
-    fi
+)
+
+for d in "${TARGET_EFI_DIRS[@]}"; do
+    mkdir -p "$d"
+    echo "===> copy signed ipxe.efi to $d/ipxe.efi" >&2
+    cp -v "$IPXE_SRC" "$d/ipxe.efi" >&2
 done
 
-if [[ -z "$EFI_BOOT_DIR" ]]; then
-    # Preferred location for live-media staging (picked up later by KIWI)
-    EFI_BOOT_DIR="$BOOT_ROOT/EFI/BOOT"
-    mkdir -p "$EFI_BOOT_DIR"
-fi
-
-echo "===> copy signed ipxe.efi to $EFI_BOOT_DIR/ipxe.efi" >&2
-cp -v "$IPXE_SRC" "$EFI_BOOT_DIR/ipxe.efi" >&2
-
-echo "===> verify EFI tree (depth 3):" >&2
-find "$BOOT_ROOT/EFI" -maxdepth 3 -type f 2>/dev/null | sort >&2 || true
+echo "===> verify EFI trees (depth 3):" >&2
+find -L "$BOOT_ROOT/EFI" -maxdepth 3 -type f 2>/dev/null | sort >&2 || true
+find -L "$BOOT_ROOT/boot/efi/EFI" -maxdepth 3 -type f 2>/dev/null | sort >&2 || true
 
 # --- Rewrite every grub.cfg found -------------------------------------------
 # mapfile -t GRUB_CFGS < <(find "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null)
@@ -180,7 +170,14 @@ ipxe_block = (
     "    insmod chain\n"
     "    insmod fat\n"
     "    insmod part_gpt\n"
-    "    chainloader /EFI/BOOT/ipxe.efi\n"
+    "    insmod part_msdos\n"
+    "    if search --file --set=efiroot /EFI/BOOT/ipxe.efi; then\n"
+    "        set root=$efiroot\n"
+    "        chainloader /EFI/BOOT/ipxe.efi\n"
+    "        boot\n"
+    "    fi\n"
+    "    echo 'iPXE binary not found: /EFI/BOOT/ipxe.efi'\n"
+    "    sleep 3\n"
     "}\n"
 )
 
