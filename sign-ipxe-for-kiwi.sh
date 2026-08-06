@@ -20,7 +20,11 @@
 set -euo pipefail
 
 DESC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "sign-ipxe-for-kiwi.sh: DESC_DIR=$DESC_DIR" >&2
+
 OUT_DIR="$DESC_DIR/root/usr/share/mok-ipxe"
+echo "sign-ipxe-for-kiwi.sh: OUT_DIR=$OUT_DIR" >&2
+
 
 IPXE_SRC=""
 KEY=""
@@ -76,6 +80,11 @@ openssl x509 -in "$CERT" -outform DER -out "$DESC_DIR/MOK.der"
 echo "Signing $IPXE_SRC ..."
 sbsign --key "$KEY" --cert "$CERT" --output "$OUT_DIR/ipxe.efi" "$IPXE_SRC"
 cp "$DESC_DIR/MOK.der" "$OUT_DIR/MOK.der"
+
+
+md5sum "$OUT_DIR/ipxe.efi" >&2
+ls -la "$OUT_DIR" >&2
+
 
 cat <<EOF
 

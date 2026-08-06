@@ -40,6 +40,9 @@ fi
 echo "editbootconfig.sh: scanning under: $BOOT_ROOT" >&2
 
 # --- Locate the signed iPXE payload -----------------------------------------
+echo "editbootconfig.sh: location: $(pwd)" >&2
+echo "editbootconfig.sh: BOOT_ROOT: $(dirname "$0")" >&2
+
 IPXE_SRC=""
 for candidate in \
     "$BOOT_ROOT"/usr/share/mok-ipxe/ipxe.efi \
@@ -59,6 +62,7 @@ if [[ -z "$IPXE_SRC" ]]; then
     exit 1
 fi
 echo "===> editbootconfig.sh: using ipxe.efi: $IPXE_SRC" >&2
+md5sum "$IPXE_SRC" >&2
 
 
 # --- Ensure ipxe.efi is present in both common KIWI EFI staging layouts -----
@@ -176,8 +180,6 @@ ipxe_block = (
     "        chainloader /EFI/BOOT/ipxe.efi\n"
     "        boot\n"
     "    fi\n"
-    "    echo 'iPXE binary not found: /EFI/BOOT/ipxe.efi'\n"
-    "    sleep 3\n"
     "}\n"
 )
 
