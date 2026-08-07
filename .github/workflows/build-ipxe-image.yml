@@ -191,8 +191,9 @@ jobs:
           IPXE_REF: ${{ inputs.ipxe_ref }}
           UYUNI_FQDN: ${{ inputs.uyuni_fqdn }}
           BOOT_SCHEME: ${{ inputs.force_unsecure_http && 'http' || 'https' }}
+          IPXE_DEBUG_FLAGS: ${{ inputs.debug_ipxe && 'DEBUG=efi_image,image,script,autoboot,http,tls' || '-' }}
         run: |
           gh release create "$RELEASE_TAG" \
             --title "$RELEASE_TITLE" \
-            --notes "iPXE ref: $IPXE_REF"$'\n'"Uyuni FQDN: $BOOT_SCHEME://$UYUNI_FQDN" \
+            --notes "iPXE ref: $IPXE_REF"$'\n'"Uyuni FQDN: $BOOT_SCHEME://$UYUNI_FQDN"'\n'"iPXE Debug: $IPXE_DEBUG_FLAGS" \
             "$GITHUB_WORKSPACE"/build/*.iso
