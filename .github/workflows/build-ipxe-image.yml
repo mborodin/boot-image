@@ -64,8 +64,25 @@ jobs:
         run: |
           cat > "$GITHUB_WORKSPACE/boot.ipxe" <<EOF
           #!ipxe
+          ifopen net0 || goto net_fail
+          dhcp net0 || goto net_fail
           set dhcp_mac \${net0/mac:hex}
-          chain --autofree ${BOOT_SCHEME}://${UYUNI_FQDN}/cblr/svc/op/ipxe/mac/\${dhcp_mac}
+          chain --autofree ${BOOT_SCHEME}://${UYUNI_FQDN}/cblr/svc/op/ipxe/mac/\${dhcp_mac} || goto chain_fail
+          goto done
+
+          :net_fail
+          echo DHCP/NET failed on net0
+          ifstat
+          route
+          shell
+
+          :chain_fail
+          echo Chain failed: ${BOOT_SCHEME}://${UYUNI_FQDN}/cblr/svc/op/ipxe/mac/\${dhcp_mac}
+          ifstat
+          route
+          shell
+
+          :done
           EOF
           echo "--- boot.ipxe ---"
           cat "$GITHUB_WORKSPACE/boot.ipxe"
