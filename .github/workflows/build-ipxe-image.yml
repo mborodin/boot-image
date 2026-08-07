@@ -18,6 +18,11 @@ on:
         description: "Uyuni FQDN that boot.ipxe should chainload to"
         required: true
         type: string
+      force_unsecure_http:
+        description: "Force insecure HTTP (instead of HTTPS) for boot.ipxe chain URL"
+        required: false
+        type: boolean
+        default: false
       release_name:
         description: "Name/title for the GitHub release"
         required: true
@@ -55,11 +60,12 @@ jobs:
       - name: Generate boot.ipxe
         env:
           UYUNI_FQDN: ${{ inputs.uyuni_fqdn }}
+          BOOT_SCHEME: ${{ inputs.force_unsecure_http && 'http' || 'https' }}
         run: |
           cat > "$GITHUB_WORKSPACE/boot.ipxe" <<EOF
           #!ipxe
           set dhcp_mac \${net0/mac:hex}
-          chain --autofree http://${UYUNI_FQDN}/cblr/svc/op/ipxe/mac/\${dhcp_mac}
+          chain --autofree ${BOOT_SCHEME}://${UYUNI_FQDN}/cblr/svc/op/ipxe/mac/\${dhcp_mac}
           EOF
           echo "--- boot.ipxe ---"
           cat "$GITHUB_WORKSPACE/boot.ipxe"
