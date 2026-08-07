@@ -32,6 +32,11 @@ on:
         required: false
         type: string
         default: master
+      debug_ipxe:
+        description: "Enable verbose iPXE debug build flags"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -102,12 +107,13 @@ jobs:
       - name: Build ipxe.efi (bin-x86_64-efi)
         env:
           TRUST_LIST: ${{ steps.certs.outputs.trust_list }}
+          IPXE_DEBUG_FLAGS: ${{ inputs.debug_ipxe && 'DEBUG=efi_image,image,script,autoboot,http,tls' || '' }}
         run: |
           make -C ipxe-src/src \
             bin-x86_64-efi/ipxe.efi \
             EMBED="$GITHUB_WORKSPACE/boot.ipxe" \
             TRUST="$TRUST_LIST" \
-            DEBUG=efi_image,image,script,autoboot,http,tls \
+            $IPXE_DEBUG_FLAGS \
             -j"$(nproc)"
           cp ipxe-src/src/bin-x86_64-efi/ipxe.efi "$GITHUB_WORKSPACE/ipxe.efi"
 
