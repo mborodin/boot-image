@@ -81,21 +81,6 @@ find -L "$BOOT_ROOT/boot/efi/EFI" -maxdepth 3 -type f 2>/dev/null | sort >&2 || 
 # --- Rewrite every grub.cfg found -------------------------------------------
 # mapfile -t GRUB_CFGS < <(find "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null)
 
-# echo "=============================="
-# echo "| grub.cfg                   |"
-# echo "+----------------------------+"
-# echo "| dir: $BOOT_ROOT            |"
-# echo "+----------------------------+"
-# ls -laR "$BOOT_ROOT"/boot/grub2/
-# echo "+----------------------------+"
-# file "$BOOT_ROOT"/boot/grub2/grub.cfg || true
-# echo "+----------------------------+"
-# find -L "$BOOT_ROOT"/boot -type f -name 'grub.cfg' 2>/dev/null || true
-# echo "+----------------------------+"
-# find -L "$BOOT_ROOT" -iname 'grub.cfg' 2>/dev/null || true
-# echo "=============================="
-
-
 if [[ ! -f "$BOOT_ROOT"/boot/grub2/grub.cfg ]]; then
     echo "editbootconfig.sh: ERROR - no grub.cfg found under $BOOT_ROOT/boot/grub2" >&2
     exit 1

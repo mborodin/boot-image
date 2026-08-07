@@ -134,13 +134,11 @@ jobs:
       - name: Build image with kiwi-ng
         run: |
           mkdir -p "$GITHUB_WORKSPACE/build"
-          docker run --rm --privileged -i \
+          docker run --rm --privileged \
             -v "$GITHUB_WORKSPACE:/image-root" \
             -w /image-root \
             opensuse/tumbleweed:latest \
             bash -c "set -euo pipefail
-              ls -la /image-root
-              ls -Ra /image-root/root
               zypper --non-interactive --gpg-auto-import-keys refresh
               zypper --non-interactive install python3-kiwi binutils qemu-tools dosfstools squashfs xorriso mtools syslinux
               kiwi-ng --debug system build \
