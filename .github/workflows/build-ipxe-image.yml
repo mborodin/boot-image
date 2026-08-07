@@ -169,8 +169,9 @@ jobs:
           RELEASE_TAG: ${{ steps.version.outputs.version }}
           IPXE_REF: ${{ inputs.ipxe_ref }}
           UYUNI_FQDN: ${{ inputs.uyuni_fqdn }}
+          BOOT_SCHEME: ${{ inputs.force_unsecure_http && 'http' || 'https' }}
         run: |
           gh release create "$RELEASE_TAG" \
             --title "$RELEASE_TITLE" \
-            --notes "iPXE ref: $IPXE_REF"$'\n'"Uyuni FQDN: $UYUNI_FQDN" \
+            --notes "iPXE ref: $IPXE_REF"$'\n'"Uyuni FQDN: $BOOT_SCHEME://$UYUNI_FQDN" \
             "$GITHUB_WORKSPACE"/build/*.iso
