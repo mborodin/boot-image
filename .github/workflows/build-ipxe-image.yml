@@ -195,5 +195,5 @@ jobs:
         run: |
           gh release create "$RELEASE_TAG" \
             --title "$RELEASE_TITLE" \
-            --notes "iPXE ref: $IPXE_REF"$'\n'"Uyuni FQDN: $BOOT_SCHEME://$UYUNI_FQDN"'\n'"iPXE Debug: $IPXE_DEBUG_FLAGS" \
+            --notes "iPXE ref: $IPXE_REF"$'\n'"Uyuni FQDN: $BOOT_SCHEME://$UYUNI_FQDN"$'\n'"iPXE Debug: $IPXE_DEBUG_FLAGS" \
             "$GITHUB_WORKSPACE"/build/*.iso
